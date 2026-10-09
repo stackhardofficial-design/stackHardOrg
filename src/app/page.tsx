@@ -21,7 +21,8 @@ import {
   Server,
   Database,
   Globe,
-  Receipt
+  Receipt,
+  Phone
 } from 'lucide-react';
 
 export default function Home() {
@@ -114,10 +115,14 @@ export default function Home() {
   const googleAccountsList = useMemo(() => {
     const map = new Map<string, number>();
     projects.forEach((p) => {
-      if (p.google_account?.trim()) {
-        const acc = p.google_account.trim();
+      const accounts = new Set<string>();
+      if (p.google_account_server?.trim()) accounts.add(p.google_account_server.trim());
+      if (p.google_account_db?.trim()) accounts.add(p.google_account_db.trim());
+      if (p.google_account?.trim()) accounts.add(p.google_account.trim());
+
+      accounts.forEach((acc) => {
         map.set(acc, (map.get(acc) || 0) + 1);
-      }
+      });
     });
     return Array.from(map.entries()).map(([email, count]) => ({ email, count }));
   }, [projects]);
@@ -129,13 +134,18 @@ export default function Home() {
         !searchTerm ||
         project.name.toLowerCase().includes(search) ||
         project.client_name?.toLowerCase().includes(search) ||
+        project.client_phone?.toLowerCase().includes(search) ||
         project.domain_name?.toLowerCase().includes(search) ||
+        project.google_account_server?.toLowerCase().includes(search) ||
+        project.google_account_db?.toLowerCase().includes(search) ||
         project.google_account?.toLowerCase().includes(search) ||
         project.notes?.toLowerCase().includes(search);
 
       const matchType = selectedType === 'todos' || project.type === selectedType;
       const matchGoogle =
         selectedGoogleAccount === 'todos' ||
+        project.google_account_server?.trim() === selectedGoogleAccount ||
+        project.google_account_db?.trim() === selectedGoogleAccount ||
         project.google_account?.trim() === selectedGoogleAccount;
       const matchStatus = selectedStatus === 'todos' || project.status === selectedStatus;
 
@@ -338,10 +348,10 @@ export default function Home() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-brand-dark/90 text-slate-400 uppercase font-mono tracking-wider border-b border-brand-border">
                   <tr>
-                    <th className="py-3 px-4">Proyecto</th>
-                    <th className="py-3 px-4">Dominio / Vencimiento</th>
-                    <th className="py-3 px-4">Cuenta Google</th>
-                    <th className="py-3 px-4">Infraestructura</th>
+                    <th className="py-3 px-4">Proyecto & Cliente</th>
+                    <th className="py-3 px-4">Dominio</th>
+                    <th className="py-3 px-4">Servidor & Cuenta Google</th>
+                    <th className="py-3 px-4">Base de Datos & Cuenta Google</th>
                     <th className="py-3 px-4">Cobros</th>
                     <th className="py-3 px-4 text-right">Acciones</th>
                   </tr>
@@ -357,10 +367,21 @@ export default function Home() {
                       <tr key={p.id} className="hover:bg-brand-surface/50 transition-colors">
                         <td className="py-3.5 px-4">
                           <div className="font-bold text-white text-sm">{p.name}</div>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                          <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-2 mt-0.5">
                             <span className="uppercase font-mono text-[10px] text-brand-orange font-semibold">{p.type}</span>
                             <span>•</span>
                             <span>{p.client_name || 'Sin cliente'}</span>
+                            {p.client_phone && (
+                              <a
+                                href={`https://wa.me/${p.client_phone.replace(/[^0-9]/g, '')}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-1 font-mono text-emerald-400 hover:text-emerald-300 ml-1"
+                              >
+                                <Phone className="w-3 h-3" />
+                                <span>{p.client_phone}</span>
+                              </a>
+                            )}
                           </div>
                         </td>
 
@@ -375,30 +396,36 @@ export default function Home() {
                           )}
                         </td>
 
-                        <td className="py-3.5 px-4 font-mono text-slate-300">
-                          {p.google_account ? (
-                            <div className="flex items-center gap-1.5 truncate max-w-[180px]">
-                              <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                              <span className="truncate">{p.google_account}</span>
+                        {/* Servidor & Google */}
+                        <td className="py-3.5 px-4">
+                          <div className="text-slate-200 font-semibold flex items-center gap-1.5 text-xs">
+                            <Server className="w-3.5 h-3.5 text-brand-orange shrink-0" />
+                            <span>{p.hosting_provider || 'Vercel'}</span>
+                          </div>
+                          {(p.google_account_server || p.google_account) ? (
+                            <div className="flex items-center gap-1 font-mono text-[11px] text-slate-400 truncate max-w-[180px] mt-0.5">
+                              <Mail className="w-3 h-3 text-brand-orange shrink-0" />
+                              <span className="truncate">{p.google_account_server || p.google_account}</span>
                             </div>
                           ) : (
-                            <span className="text-slate-500 italic">No asignada</span>
+                            <span className="text-[10px] text-slate-600 font-mono italic">Sin cuenta asignada</span>
                           )}
                         </td>
 
+                        {/* Base de Datos & Google */}
                         <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2 text-[11px]">
-                            {p.hosting_provider && (
-                              <span className="px-2 py-0.5 rounded bg-brand-surface border border-brand-border text-slate-300">
-                                {p.hosting_provider}
-                              </span>
-                            )}
-                            {p.db_provider && (
-                              <span className="px-2 py-0.5 rounded bg-brand-surface border border-brand-border text-slate-300">
-                                {p.db_provider}
-                              </span>
-                            )}
+                          <div className="text-slate-200 font-semibold flex items-center gap-1.5 text-xs">
+                            <Database className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>{p.db_provider || 'Supabase'}</span>
                           </div>
+                          {(p.google_account_db || p.google_account) ? (
+                            <div className="flex items-center gap-1 font-mono text-[11px] text-slate-400 truncate max-w-[180px] mt-0.5">
+                              <Mail className="w-3 h-3 text-emerald-400 shrink-0" />
+                              <span className="truncate">{p.google_account_db || p.google_account}</span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-600 font-mono italic">Sin cuenta asignada</span>
+                          )}
                         </td>
 
                         <td className="py-3.5 px-4 font-mono">

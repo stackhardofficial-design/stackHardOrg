@@ -12,7 +12,8 @@ import {
   ShieldCheck, 
   ShieldAlert, 
   Receipt,
-  Globe
+  Globe,
+  Phone
 } from 'lucide-react';
 import { ProjectWithPayments } from '@/types';
 
@@ -141,9 +142,23 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments }: Pro
             )}
           </div>
           {project.client_name && (
-            <p className="text-xs text-slate-400 mt-0.5">
-              Cliente: <span className="text-slate-200 font-medium">{project.client_name}</span>
-            </p>
+            <div className="flex items-center justify-between text-xs text-slate-400 mt-1">
+              <p>
+                Cliente: <span className="text-slate-200 font-semibold">{project.client_name}</span>
+              </p>
+              {project.client_phone && (
+                <a
+                  href={`https://wa.me/${project.client_phone.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 hover:text-emerald-300 transition-colors"
+                  title="Abrir WhatsApp / Llamar"
+                >
+                  <Phone className="w-3 h-3 text-emerald-400" />
+                  <span>{project.client_phone}</span>
+                </a>
+              )}
+            </div>
           )}
         </div>
 
@@ -178,29 +193,38 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments }: Pro
           )}
         </div>
 
-        {/* Cuentas de Google e Infraestructura */}
+        {/* Cuentas de Google e Infraestructura (Servidor & BD Separados) */}
         <div className="space-y-1.5 text-xs mb-3.5">
-          {project.google_account && (
-            <div className="flex items-center gap-2 bg-brand-surface/70 px-2.5 py-1.5 rounded-lg border border-brand-border">
-              <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-              <span className="text-slate-400 text-[11px] shrink-0 font-medium">Google:</span>
-              <span className="text-slate-200 font-mono text-[11px] truncate font-medium">
-                {project.google_account}
+          {/* Servidor / Hosting */}
+          <div className="bg-brand-surface/70 p-2 rounded-lg border border-brand-border space-y-0.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
+                <Server className="w-3 h-3 text-brand-orange shrink-0" />
+                <span>Servidor:</span>
+                <span className="text-slate-200 font-mono font-normal">{project.hosting_provider || 'Vercel'}</span>
               </span>
             </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-1.5">
-            {project.hosting_provider && (
-              <div className="flex items-center gap-1.5 bg-brand-surface/50 px-2 py-1 rounded border border-brand-border text-[11px] text-slate-300">
-                <Server className="w-3 h-3 text-brand-orange shrink-0" />
-                <span className="truncate">{project.hosting_provider}</span>
+            {(project.google_account_server || project.google_account) && (
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 pl-4 truncate">
+                <Mail className="w-3 h-3 text-brand-orange shrink-0" />
+                <span className="truncate">{project.google_account_server || project.google_account}</span>
               </div>
             )}
-            {project.db_provider && (
-              <div className="flex items-center gap-1.5 bg-brand-surface/50 px-2 py-1 rounded border border-brand-border text-[11px] text-slate-300">
+          </div>
+
+          {/* Base de Datos */}
+          <div className="bg-brand-surface/70 p-2 rounded-lg border border-brand-border space-y-0.5">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                 <Database className="w-3 h-3 text-emerald-400 shrink-0" />
-                <span className="truncate">{project.db_provider}</span>
+                <span>Base de Datos:</span>
+                <span className="text-slate-200 font-mono font-normal">{project.db_provider || 'Supabase'}</span>
+              </span>
+            </div>
+            {(project.google_account_db || project.google_account) && (
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400 pl-4 truncate">
+                <Mail className="w-3 h-3 text-emerald-400 shrink-0" />
+                <span className="truncate">{project.google_account_db || project.google_account}</span>
               </div>
             )}
           </div>

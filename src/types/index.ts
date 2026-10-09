@@ -10,10 +10,13 @@ export interface Project {
   id: string;
   name: string;
   client_name?: string | null;
+  client_phone?: string | null;
   type: ProjectType;
   status: ProjectStatus;
   url?: string | null;
   google_account?: string | null;
+  google_account_server?: string | null;
+  google_account_db?: string | null;
   hosting_provider?: string | null;
   db_provider?: string | null;
   domain_name?: string | null;
