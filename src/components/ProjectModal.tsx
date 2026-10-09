@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Globe, Server, Database, Mail, DollarSign, Calendar, FileText, Check } from 'lucide-react';
+import { X, Globe, Server, Database, Mail, DollarSign, Calendar, FileText, Check, Clock } from 'lucide-react';
 import { Project, ProjectType, ProjectStatus, BillingType, RecurringPeriod } from '@/types';
 
 interface ProjectModalProps {
@@ -402,17 +402,12 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
                 </select>
               </div>
 
-              {formData.recurring_period !== 'ninguno' && (
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Próxima Fecha de Cobro de Mantenimiento
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.next_billing_date || ''}
-                    onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
-                    className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
-                  />
+              {formData.recurring_period === 'mensual' && (
+                <div className="sm:col-span-2 bg-brand-surface/40 p-2.5 rounded-lg border border-brand-border">
+                  <p className="text-[11px] text-slate-300 flex items-center gap-1.5 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-brand-orange" />
+                    <span>Regla de Cobro: <strong>Antes del día 10 de cada mes</strong>. Podrás marcar con 1 clic si ya te pagaron el mes actual o si está pendiente.</span>
+                  </p>
                 </div>
               )}
             </div>

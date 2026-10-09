@@ -1,17 +1,21 @@
 'use client';
 
 import React from 'react';
-import { AlertCircle, Clock, ShieldAlert, ArrowRight, ExternalLink } from 'lucide-react';
+import { AlertCircle, Clock, ShieldAlert, ArrowRight, ExternalLink, Check } from 'lucide-react';
 import { ProjectWithPayments } from '@/types';
 
 interface UpcomingRenewalsProps {
   projects: ProjectWithPayments[];
   onSelectProject: (project: ProjectWithPayments) => void;
+  onQuickMarkMonthlyPaid?: (project: ProjectWithPayments) => void;
 }
 
-export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewalsProps) {
+export function UpcomingRenewals({ projects, onSelectProject, onQuickMarkMonthlyPaid }: UpcomingRenewalsProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const currentDay = today.getDate();
 
   // Dominios que renuevan en los próximos 45 días o ya vencieron
   const domainAlerts = projects
@@ -25,17 +29,24 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
     .filter((item) => item.days <= 45)
     .sort((a, b) => a.days - b.days);
 
-  // Próximos cobros de mantenimiento en los próximos 30 días
+  // Mantenimientos mensuales que AÚN NO se han cobrado este mes (Regla: antes del día 10)
   const billingAlerts = projects
-    .filter((p) => p.recurring_amount > 0 && p.next_billing_date)
-    .map((p) => {
-      const billDate = new Date(p.next_billing_date + 'T00:00:00');
-      const diffTime = billDate.getTime() - today.getTime();
-      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return { project: p, days, billDate: p.next_billing_date };
+    .filter((p) => Number(p.recurring_amount) > 0 && p.recurring_period === 'mensual')
+    .filter((p) => {
+      // Verificar si ya tiene pago de mantenimiento registrado este mes
+      const hasPaid = p.payments?.some((pay) => {
+        if (pay.payment_type !== 'mantenimiento') return false;
+        const payDate = new Date(pay.payment_date + 'T00:00:00');
+        return payDate.getFullYear() === currentYear && payDate.getMonth() === currentMonth && pay.status === 'completado';
+      });
+      return !hasPaid;
     })
-    .filter((item) => item.days <= 30)
-    .sort((a, b) => a.days - b.days);
+    .map((p) => {
+      // Días hasta el día 10 del mes en curso
+      const daysUntilTen = 10 - currentDay;
+      return { project: p, daysUntilTen };
+    })
+    .sort((a, b) => a.daysUntilTen - b.daysUntilTen);
 
   if (domainAlerts.length === 0 && billingAlerts.length === 0) {
     return null;
@@ -97,28 +108,27 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
         </div>
       )}
 
-      {/* 2. Próximos Cobros de Mantenimiento */}
+      {/* 2. Cobros de Mantenimiento Pendientes de este Mes (Antes del 10) */}
       {billingAlerts.length > 0 && (
         <div className="bg-brand-card border border-brand-border rounded-xl p-4 shadow-metal">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
               <Clock className="w-4 h-4" />
-              <span>Próximos Cobros de Mantenimiento ({billingAlerts.length})</span>
+              <span>Mantenimientos Pendientes este Mes ({billingAlerts.length})</span>
             </div>
-            <span className="text-[10px] font-mono text-slate-400 bg-brand-surface px-2 py-0.5 rounded border border-brand-border">
-              Facturación
+            <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-semibold">
+              Vence el 10
             </span>
           </div>
 
           <div className="space-y-2">
-            {billingAlerts.map(({ project, days, billDate }) => (
+            {billingAlerts.map(({ project, daysUntilTen }) => (
               <div
                 key={project.id}
-                onClick={() => onSelectProject(project)}
-                className="group flex items-center justify-between bg-brand-dark/80 hover:bg-brand-surface p-3 rounded-lg border border-brand-border hover:border-amber-500/40 cursor-pointer transition-all"
+                className="flex items-center justify-between bg-brand-dark/80 p-3 rounded-lg border border-brand-border"
               >
-                <div>
-                  <span className="text-xs text-white font-bold group-hover:text-amber-400 transition-colors block">
+                <div onClick={() => onSelectProject(project)} className="cursor-pointer">
+                  <span className="text-xs text-white font-bold hover:text-amber-400 transition-colors block">
                     {project.name}
                   </span>
                   <span className="text-[11px] text-slate-400 block mt-0.5">
@@ -126,13 +136,28 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
                   </span>
                 </div>
 
-                <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-emerald-400 block">
-                    +${project.recurring_amount} USD
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {days < 0 ? `Atrasado (${Math.abs(days)}d)` : days === 0 ? 'Cobrar Hoy' : `En ${days} días`} ({billDate})
-                  </span>
+                <div className="flex items-center gap-2.5">
+                  <div className="text-right">
+                    <span className="text-xs font-mono font-bold text-emerald-400 block">
+                      +${project.recurring_amount} USD
+                    </span>
+                    <span className={`text-[10px] font-mono ${
+                      daysUntilTen < 0 ? 'text-rose-400 font-bold' : daysUntilTen === 0 ? 'text-amber-400 font-bold' : 'text-slate-400'
+                    }`}>
+                      {daysUntilTen < 0 ? `Atrasado (${Math.abs(daysUntilTen)}d)` : daysUntilTen === 0 ? '¡Vence Hoy (día 10)!' : `Vence en ${daysUntilTen} días`}
+                    </span>
+                  </div>
+
+                  {onQuickMarkMonthlyPaid && (
+                    <button
+                      onClick={() => onQuickMarkMonthlyPaid(project)}
+                      title="Marcar cobrado este mes"
+                      className="px-2.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-black border border-emerald-500/30 font-semibold text-[11px] transition-colors flex items-center gap-1 shrink-0"
+                    >
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Cobrado</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

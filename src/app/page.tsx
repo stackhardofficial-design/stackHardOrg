@@ -22,7 +22,8 @@ import {
   Database,
   Globe,
   Receipt,
-  Phone
+  Phone,
+  Check
 } from 'lucide-react';
 
 export default function Home() {
@@ -84,21 +85,80 @@ export default function Home() {
   }, []);
 
   const handleSaveProject = async (data: Partial<Project>) => {
+    // Sanitizar payload para que no incluya claves inexistentes en la tabla ni fechas inválidas
+    const payload = {
+      name: data.name?.trim() || '',
+      client_name: data.client_name?.trim() || null,
+      client_phone: data.client_phone?.trim() || null,
+      type: data.type || 'landing',
+      status: data.status || 'activo',
+      url: data.url?.trim() || null,
+      google_account: data.google_account_server?.trim() || data.google_account_db?.trim() || data.google_account?.trim() || null,
+      google_account_server: data.google_account_server?.trim() || null,
+      google_account_db: data.google_account_db?.trim() || null,
+      hosting_provider: data.hosting_provider?.trim() || null,
+      db_provider: data.db_provider?.trim() || null,
+      domain_name: data.domain_name?.trim() || null,
+      domain_registrar: data.domain_registrar?.trim() || null,
+      domain_renews: Boolean(data.domain_renews),
+      domain_renewal_date: (data.domain_renews && data.domain_renewal_date?.trim()) ? data.domain_renewal_date.trim() : null,
+      domain_cost: Number(data.domain_cost) || 0,
+      billing_type: data.billing_type || 'pago_unico',
+      one_time_price: Number(data.one_time_price) || 0,
+      recurring_amount: Number(data.recurring_amount) || 0,
+      recurring_period: data.recurring_period || 'ninguno',
+      notes: data.notes?.trim() || null,
+    };
+
     if (editingProject) {
       const { error } = await supabase
         .from('projects')
         .update({
-          ...data,
+          ...payload,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingProject.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error Supabase update:', error);
+        throw error;
+      }
     } else {
-      const { error } = await supabase.from('projects').insert([data]);
-      if (error) throw error;
+      const { error } = await supabase.from('projects').insert([payload]);
+      if (error) {
+        console.error('Error Supabase insert:', error);
+        throw error;
+      }
     }
     await fetchData();
+  };
+
+  // Marcar mantenimiento de este mes como cobrado con 1 solo clic
+  const handleQuickMarkMonthlyPaid = async (project: ProjectWithPayments) => {
+    const today = new Date();
+    const currentMonthName = today.toLocaleString('es-ES', { month: 'long' });
+    const capitalizedMonth = currentMonthName.charAt(0).toUpperCase() + currentMonthName.slice(1);
+    const concept = `Mantenimiento ${capitalizedMonth} ${today.getFullYear()}`;
+    const dateStr = today.toISOString().split('T')[0];
+
+    try {
+      const { error } = await supabase.from('payments').insert([
+        {
+          project_id: project.id,
+          concept,
+          amount: Number(project.recurring_amount),
+          payment_date: dateStr,
+          payment_type: 'mantenimiento',
+          status: 'completado',
+        },
+      ]);
+
+      if (error) throw error;
+      await fetchData();
+    } catch (err) {
+      console.error('Error al registrar cobro rápido:', err);
+      alert('Error al registrar el cobro de mantenimiento');
+    }
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -177,6 +237,7 @@ export default function Home() {
             setEditingProject(proj);
             setIsProjectModalOpen(true);
           }}
+          onQuickMarkMonthlyPaid={handleQuickMarkMonthlyPaid}
         />
 
         {/* Barra de Filtros, Búsqueda y Modos de Vista */}
@@ -338,6 +399,7 @@ export default function Home() {
                 onManagePayments={(p) => {
                   setPaymentsModalProject(p);
                 }}
+                onQuickMarkMonthlyPaid={handleQuickMarkMonthlyPaid}
               />
             ))}
           </div>
@@ -437,10 +499,57 @@ export default function Home() {
                               +${p.recurring_amount}/{p.recurring_period === 'mensual' ? 'mes' : 'año'}
                             </div>
                           )}
+
+                          {/* Estado mensual antes del 10 en tabla */}
+                          {Number(p.recurring_amount) > 0 && p.recurring_period === 'mensual' && (() => {
+                            const now = new Date();
+                            const curYear = now.getFullYear();
+                            const curMonth = now.getMonth();
+                            const curDay = now.getDate();
+
+                            const isPaid = Boolean(
+                              p.payments?.some((pay) => {
+                                if (pay.payment_type !== 'mantenimiento') return false;
+                                const pDate = new Date(pay.payment_date + 'T00:00:00');
+                                return pDate.getFullYear() === curYear && pDate.getMonth() === curMonth && pay.status === 'completado';
+                              })
+                            );
+
+                            return isPaid ? (
+                              <span className="text-[10px] text-emerald-400 font-semibold block mt-0.5">
+                                ✓ Mes cobrado
+                              </span>
+                            ) : curDay <= 10 ? (
+                              <span className="text-[10px] text-amber-400 font-semibold block mt-0.5">
+                                Pendiente (vence el 10)
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-rose-400 font-semibold block mt-0.5">
+                                Atrasado (venció el 10)
+                              </span>
+                            );
+                          })()}
                         </td>
 
                         <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                            {/* Botón rápido si falta cobrar este mes */}
+                            {Number(p.recurring_amount) > 0 && p.recurring_period === 'mensual' && !p.payments?.some((pay) => {
+                              if (pay.payment_type !== 'mantenimiento') return false;
+                              const pDate = new Date(pay.payment_date + 'T00:00:00');
+                              const now = new Date();
+                              return pDate.getFullYear() === now.getFullYear() && pDate.getMonth() === now.getMonth() && pay.status === 'completado';
+                            }) && (
+                              <button
+                                onClick={() => handleQuickMarkMonthlyPaid(p)}
+                                title="Marcar cobrado este mes"
+                                className="px-2 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-semibold flex items-center gap-1"
+                              >
+                                <Check className="w-3 h-3 text-amber-400" />
+                                <span>Cobrar mes</span>
+                              </button>
+                            )}
+
                             <button
                               onClick={() => setPaymentsModalProject(p)}
                               className="px-2 py-1 rounded bg-brand-surface hover:bg-brand-border text-slate-200 border border-brand-border text-[11px] font-semibold flex items-center gap-1"

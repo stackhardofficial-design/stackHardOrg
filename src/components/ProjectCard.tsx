@@ -13,7 +13,8 @@ import {
   ShieldAlert, 
   Receipt,
   Globe,
-  Phone
+  Phone,
+  Check
 } from 'lucide-react';
 import { ProjectWithPayments } from '@/types';
 
@@ -22,9 +23,10 @@ interface ProjectCardProps {
   onEdit: (project: ProjectWithPayments) => void;
   onDelete: (id: string) => void;
   onManagePayments: (project: ProjectWithPayments) => void;
+  onQuickMarkMonthlyPaid?: (project: ProjectWithPayments) => void;
 }
 
-export function ProjectCard({ project, onEdit, onDelete, onManagePayments }: ProjectCardProps) {
+export function ProjectCard({ project, onEdit, onDelete, onManagePayments, onQuickMarkMonthlyPaid }: ProjectCardProps) {
   // Cálculo de días restantes de dominio
   let domainStatusText = 'Sin dominio';
   let domainStatusBadge = 'text-slate-400 bg-brand-surface border-brand-border';
@@ -230,8 +232,8 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments }: Pro
           </div>
         </div>
 
-        {/* Cobros y Finanzas */}
-        <div className="bg-brand-dark/60 rounded-lg p-2.5 border border-brand-border space-y-1.5 text-xs">
+        {/* Cobros y Finanzas con Regla de cobro antes del día 10 */}
+        <div className="bg-brand-dark/60 rounded-lg p-2.5 border border-brand-border space-y-2 text-xs">
           <div className="flex justify-between items-center text-slate-400">
             <span className="text-[11px] font-medium uppercase tracking-wider">Esquema:</span>
             <span className="capitalize text-slate-200 font-medium">
@@ -259,15 +261,53 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments }: Pro
             )}
           </div>
 
-          {project.next_billing_date && (
-            <div className="pt-1.5 border-t border-brand-border/60 flex items-center justify-between text-[11px] text-slate-400">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3 text-brand-orange" />
-                Próx. cobro:
-              </span>
-              <span className="text-slate-200 font-mono font-medium">{project.next_billing_date}</span>
-            </div>
-          )}
+          {/* Estado de Cobro Mensual (Regla: antes del día 10 de cada mes) */}
+          {Number(project.recurring_amount) > 0 && project.recurring_period === 'mensual' && (() => {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const currentDay = now.getDate();
+
+            const isPaidThisMonth = Boolean(
+              project.payments?.some((p) => {
+                if (p.payment_type !== 'mantenimiento') return false;
+                const pDate = new Date(p.payment_date + 'T00:00:00');
+                return pDate.getFullYear() === currentYear && pDate.getMonth() === currentMonth && p.status === 'completado';
+              })
+            );
+
+            return (
+              <div className="pt-2 border-t border-brand-border/60">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] uppercase font-mono text-slate-400">Mes actual:</span>
+                  {isPaidThisMonth ? (
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1">
+                      <Check className="w-3 h-3" />
+                      <span>Cobrado</span>
+                    </span>
+                  ) : currentDay <= 10 ? (
+                    <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
+                      Cobrar antes del 10
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">
+                      Atrasado (Venció el 10)
+                    </span>
+                  )}
+                </div>
+
+                {!isPaidThisMonth && onQuickMarkMonthlyPaid && (
+                  <button
+                    onClick={() => onQuickMarkMonthlyPaid(project)}
+                    className="w-full mt-1 py-1 px-2 rounded bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <Check className="w-3 h-3 text-amber-400" />
+                    <span>Marcar Cobrado este mes (+${project.recurring_amount})</span>
+                  </button>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
