@@ -24,9 +24,19 @@ interface ProjectCardProps {
   onDelete: (id: string) => void;
   onManagePayments: (project: ProjectWithPayments) => void;
   onQuickMarkMonthlyPaid?: (project: ProjectWithPayments) => void;
+  onRenewDomain?: (project: ProjectWithPayments) => void;
+  onToggleDomainRenewal?: (project: ProjectWithPayments, renews: boolean) => void;
 }
 
-export function ProjectCard({ project, onEdit, onDelete, onManagePayments, onQuickMarkMonthlyPaid }: ProjectCardProps) {
+export function ProjectCard({ 
+  project, 
+  onEdit, 
+  onDelete, 
+  onManagePayments, 
+  onQuickMarkMonthlyPaid,
+  onRenewDomain,
+  onToggleDomainRenewal
+}: ProjectCardProps) {
   // Cálculo de días restantes de dominio
   let domainStatusText = 'Sin dominio';
   let domainStatusBadge = 'text-slate-400 bg-brand-surface border-brand-border';
@@ -165,7 +175,7 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments, onQui
         </div>
 
         {/* Sección Dominio */}
-        <div className="bg-brand-dark/90 rounded-lg p-3 border border-brand-border mb-3 space-y-1.5">
+        <div className="bg-brand-dark/90 rounded-lg p-3 border border-brand-border mb-3 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 flex items-center gap-1.5 font-medium">
               <Globe className="w-3.5 h-3.5 text-brand-orange" />
@@ -191,6 +201,48 @@ export function ProjectCard({ project, onEdit, onDelete, onManagePayments, onQui
             <div className="text-[11px] text-slate-500 font-mono flex justify-between pt-0.5 border-t border-brand-border/60">
               <span>Registrador: {project.domain_registrar}</span>
               {Number(project.domain_cost) > 0 && <span>${project.domain_cost}/año</span>}
+            </div>
+          )}
+
+          {/* Acciones de Renovación Anual */}
+          {project.domain_name && (
+            <div className="pt-1.5 border-t border-brand-border/60 flex items-center justify-between gap-1.5 text-[11px]">
+              {project.domain_renews ? (
+                <>
+                  {daysRemaining !== null && daysRemaining <= 45 && onRenewDomain && (
+                    <button
+                      onClick={() => onRenewDomain(project)}
+                      className="flex-1 py-1 px-2 rounded bg-brand-orange/15 hover:bg-brand-orange text-brand-orange hover:text-black border border-brand-orange/30 font-bold text-[10px] uppercase font-mono tracking-wider transition-colors flex items-center justify-center gap-1"
+                      title="Renovar por 1 año más y actualizar fecha de vencimiento"
+                    >
+                      <Check className="w-3 h-3 stroke-[3]" />
+                      <span>Renovar (+1 Año)</span>
+                    </button>
+                  )}
+                  {onToggleDomainRenewal && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`¿Marcar que el dominio "${project.domain_name}" ya no se renueva?`)) {
+                          onToggleDomainRenewal(project, false);
+                        }
+                      }}
+                      className="text-slate-500 hover:text-slate-300 text-[10px] font-mono underline ml-auto"
+                      title="Dar de baja renovación de este dominio"
+                    >
+                      Ya no renovar
+                    </button>
+                  )}
+                </>
+              ) : (
+                onToggleDomainRenewal && (
+                  <button
+                    onClick={() => onToggleDomainRenewal(project, true)}
+                    className="w-full py-0.5 px-2 rounded bg-brand-surface hover:bg-brand-border text-slate-300 text-[10px] font-mono border border-brand-border transition-colors text-center"
+                  >
+                    + Reactivar renovación anual
+                  </button>
+                )
+              )}
             </div>
           )}
         </div>

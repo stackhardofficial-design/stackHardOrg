@@ -161,6 +161,65 @@ export default function Home() {
     }
   };
 
+  // Renovar dominio por 1 año más automáticamente y registrar pago si aplica
+  const handleRenewDomainYear = async (project: ProjectWithPayments) => {
+    if (!project.domain_renewal_date) return;
+    const baseDate = new Date(project.domain_renewal_date + 'T00:00:00');
+    baseDate.setFullYear(baseDate.getFullYear() + 1);
+    const newRenewalDate = baseDate.toISOString().split('T')[0];
+
+    try {
+      const { error: pError } = await supabase
+        .from('projects')
+        .update({
+          domain_renewal_date: newRenewalDate,
+          domain_renews: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', project.id);
+
+      if (pError) throw pError;
+
+      // Si tiene costo de renovación anual configurado, registrar cobro/pago
+      if (Number(project.domain_cost) > 0) {
+        await supabase.from('payments').insert([
+          {
+            project_id: project.id,
+            concept: `Renovación dominio ${project.domain_name || ''} (Ciclo ${baseDate.getFullYear()})`,
+            amount: Number(project.domain_cost),
+            payment_date: new Date().toISOString().split('T')[0],
+            payment_type: 'dominio',
+            status: 'completado',
+          },
+        ]);
+      }
+
+      await fetchData();
+    } catch (err) {
+      console.error('Error al renovar dominio:', err);
+      alert('Error al actualizar la renovación del dominio');
+    }
+  };
+
+  // Cambiar estado a "Ya no renueva" o reactivar
+  const handleToggleDomainRenewal = async (project: ProjectWithPayments, renews: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({
+          domain_renews: renews,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', project.id);
+
+      if (error) throw error;
+      await fetchData();
+    } catch (err) {
+      console.error('Error al cambiar estado de renovación de dominio:', err);
+      alert('Error al actualizar estado del dominio');
+    }
+  };
+
   const handleDeleteProject = async (id: string) => {
     try {
       const { error } = await supabase.from('projects').delete().eq('id', id);
@@ -238,6 +297,8 @@ export default function Home() {
             setIsProjectModalOpen(true);
           }}
           onQuickMarkMonthlyPaid={handleQuickMarkMonthlyPaid}
+          onRenewDomain={handleRenewDomainYear}
+          onToggleDomainRenewal={handleToggleDomainRenewal}
         />
 
         {/* Barra de Filtros, Búsqueda y Modos de Vista */}
@@ -400,6 +461,8 @@ export default function Home() {
                   setPaymentsModalProject(p);
                 }}
                 onQuickMarkMonthlyPaid={handleQuickMarkMonthlyPaid}
+                onRenewDomain={handleRenewDomainYear}
+                onToggleDomainRenewal={handleToggleDomainRenewal}
               />
             ))}
           </div>
@@ -411,7 +474,7 @@ export default function Home() {
                 <thead className="bg-brand-dark/90 text-slate-400 uppercase font-mono tracking-wider border-b border-brand-border">
                   <tr>
                     <th className="py-3 px-4">Proyecto & Cliente</th>
-                    <th className="py-3 px-4">Dominio</th>
+                    <th className="py-3 px-4">Dominio & Renovación</th>
                     <th className="py-3 px-4">Servidor & Cuenta Google</th>
                     <th className="py-3 px-4">Base de Datos & Cuenta Google</th>
                     <th className="py-3 px-4">Cobros</th>
@@ -424,6 +487,14 @@ export default function Home() {
                       (sum, pay) => sum + (pay.status === 'completado' ? Number(pay.amount) : 0),
                       0
                     ) || 0;
+
+                    let daysToRenew: number | null = null;
+                    if (p.domain_renewal_date && p.domain_renews) {
+                      const t = new Date();
+                      t.setHours(0, 0, 0, 0);
+                      const r = new Date(p.domain_renewal_date + 'T00:00:00');
+                      daysToRenew = Math.ceil((r.getTime() - t.getTime()) / (1000 * 60 * 60 * 24));
+                    }
 
                     return (
                       <tr key={p.id} className="hover:bg-brand-surface/50 transition-colors">
@@ -451,9 +522,56 @@ export default function Home() {
                           <div className="font-semibold text-slate-200">
                             {p.domain_name || 'Sin dominio'}
                           </div>
-                          {p.domain_renews && p.domain_renewal_date && (
-                            <div className="text-[11px] text-slate-400">
-                              Vence: {p.domain_renewal_date}
+
+                          {p.domain_name && (
+                            <div className="mt-0.5">
+                              {p.domain_renews ? (
+                                <div>
+                                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                                    <span>Vence: {p.domain_renewal_date}</span>
+                                    {daysToRenew !== null && (
+                                      <span className={`text-[10px] font-bold ${
+                                        daysToRenew < 0 ? 'text-rose-400' : daysToRenew <= 15 ? 'text-brand-orange' : daysToRenew <= 45 ? 'text-amber-400' : 'text-slate-500'
+                                      }`}>
+                                        ({daysToRenew < 0 ? `Vencido ${Math.abs(daysToRenew)}d` : `${daysToRenew}d`})
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {daysToRenew !== null && daysToRenew <= 45 && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <button
+                                        onClick={() => handleRenewDomainYear(p)}
+                                        className="px-1.5 py-0.5 rounded bg-brand-orange text-black font-bold text-[10px] hover:bg-brand-orangeBright transition-colors"
+                                      >
+                                        Renovar +1A
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (confirm(`¿Marcar que "${p.domain_name}" ya no se renueva?`)) {
+                                            handleToggleDomainRenewal(p, false);
+                                          }
+                                        }}
+                                        className="text-[10px] text-slate-500 hover:text-slate-300 underline"
+                                      >
+                                        No renovar
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[10px] text-slate-500 bg-brand-surface px-1.5 py-0.2 rounded border border-brand-border">
+                                    Ya no se renueva
+                                  </span>
+                                  <button
+                                    onClick={() => handleToggleDomainRenewal(p, true)}
+                                    className="text-[10px] text-brand-orange hover:underline"
+                                  >
+                                    Reactivar
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
                         </td>

@@ -8,9 +8,17 @@ interface UpcomingRenewalsProps {
   projects: ProjectWithPayments[];
   onSelectProject: (project: ProjectWithPayments) => void;
   onQuickMarkMonthlyPaid?: (project: ProjectWithPayments) => void;
+  onRenewDomain?: (project: ProjectWithPayments) => void;
+  onToggleDomainRenewal?: (project: ProjectWithPayments, renews: boolean) => void;
 }
 
-export function UpcomingRenewals({ projects, onSelectProject, onQuickMarkMonthlyPaid }: UpcomingRenewalsProps) {
+export function UpcomingRenewals({ 
+  projects, 
+  onSelectProject, 
+  onQuickMarkMonthlyPaid,
+  onRenewDomain,
+  onToggleDomainRenewal
+}: UpcomingRenewalsProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const currentYear = today.getFullYear();
@@ -63,7 +71,7 @@ export function UpcomingRenewals({ projects, onSelectProject, onQuickMarkMonthly
               <span>Dominios por Renovar ({domainAlerts.length})</span>
             </div>
             <span className="text-[10px] font-mono text-slate-400 bg-brand-surface px-2 py-0.5 rounded border border-brand-border">
-              Acción requerida
+              Acción anual requerida
             </span>
           </div>
 
@@ -71,12 +79,11 @@ export function UpcomingRenewals({ projects, onSelectProject, onQuickMarkMonthly
             {domainAlerts.map(({ project, days, renewalDate }) => (
               <div
                 key={project.id}
-                onClick={() => onSelectProject(project)}
-                className="group flex items-center justify-between bg-brand-dark/80 hover:bg-brand-surface p-3 rounded-lg border border-brand-border hover:border-brand-orange/40 cursor-pointer transition-all"
+                className="flex items-center justify-between bg-brand-dark/80 p-3 rounded-lg border border-brand-border"
               >
-                <div>
+                <div onClick={() => onSelectProject(project)} className="cursor-pointer">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-white font-bold group-hover:text-brand-orange transition-colors">
+                    <span className="font-mono text-xs text-white font-bold hover:text-brand-orange transition-colors">
                       {project.domain_name}
                     </span>
                     {project.domain_registrar && (
@@ -90,17 +97,46 @@ export function UpcomingRenewals({ projects, onSelectProject, onQuickMarkMonthly
                   </span>
                 </div>
 
-                <div className="text-right">
-                  <span className={`text-xs font-mono font-bold block ${
-                    days < 0 
-                      ? 'text-rose-500' 
-                      : days <= 15 
-                      ? 'text-brand-orange' 
-                      : 'text-amber-400'
-                  }`}>
-                    {days < 0 ? `Vencido (${Math.abs(days)}d)` : days === 0 ? '¡Vence Hoy!' : `En ${days} días`}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono">{renewalDate}</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="text-right">
+                    <span className={`text-xs font-mono font-bold block ${
+                      days < 0 
+                        ? 'text-rose-500' 
+                        : days <= 15 
+                        ? 'text-brand-orange' 
+                        : 'text-amber-400'
+                    }`}>
+                      {days < 0 ? `Vencido (${Math.abs(days)}d)` : days === 0 ? '¡Vence Hoy!' : `En ${days} días`}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono">{renewalDate}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    {onRenewDomain && (
+                      <button
+                        onClick={() => onRenewDomain(project)}
+                        title="Renovar por 1 año más"
+                        className="px-2 py-1 rounded bg-brand-orange hover:bg-brand-orangeBright text-black font-bold text-[10px] uppercase font-mono tracking-wider transition-colors flex items-center gap-1 shrink-0"
+                      >
+                        <Check className="w-3 h-3 stroke-[3]" />
+                        <span>Renovar +1A</span>
+                      </button>
+                    )}
+
+                    {onToggleDomainRenewal && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`¿Marcar que el dominio "${project.domain_name}" ya no se renueva?`)) {
+                            onToggleDomainRenewal(project, false);
+                          }
+                        }}
+                        title="Ya no se renueva este dominio"
+                        className="p-1 text-slate-500 hover:text-slate-300 text-[10px] font-mono transition-colors"
+                      >
+                        ✕ No renueva
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

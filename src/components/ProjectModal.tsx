@@ -234,17 +234,18 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
                 />
               </div>
 
-              <div className="flex items-center gap-2 sm:col-span-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="domain_renews"
-                  checked={formData.domain_renews ?? true}
-                  onChange={(e) => setFormData({ ...formData, domain_renews: e.target.checked })}
-                  className="rounded bg-brand-dark border-brand-border text-brand-orange focus:ring-0 w-4 h-4 cursor-pointer accent-orange-500"
-                />
-                <label htmlFor="domain_renews" className="text-xs text-slate-300 cursor-pointer">
-                  ¿Tengo que renovar este dominio anualmente?
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Estado de Renovación del Dominio
                 </label>
+                <select
+                  value={formData.domain_renews ? 'activo' : 'no_renovar'}
+                  onChange={(e) => setFormData({ ...formData, domain_renews: e.target.value === 'activo' })}
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                >
+                  <option value="activo">✓ Se renueva anualmente en la fecha</option>
+                  <option value="no_renovar">✗ Ya no se renueva / Cancelado (Dado de baja)</option>
+                </select>
               </div>
 
               {formData.domain_renews && (
