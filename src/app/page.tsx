@@ -610,7 +610,7 @@ export default function Home() {
 
                         <td className="py-3.5 px-4 font-mono">
                           <div className="text-white font-bold">
-                            ${totalPagado > 0 ? totalPagado : Number(p.one_time_price || 0)} USD
+                            ${totalPagado > 0 ? totalPagado : Number(p.one_time_price || 0)} ARS
                           </div>
                           {Number(p.recurring_amount) > 0 && (
                             <div className="text-[11px] text-amber-400">

@@ -175,7 +175,7 @@ export function UpcomingRenewals({
                 <div className="flex items-center gap-2.5">
                   <div className="text-right">
                     <span className="text-xs font-mono font-bold text-emerald-400 block">
-                      +${project.recurring_amount} USD
+                      +${project.recurring_amount} ARS
                     </span>
                     <span className={`text-[10px] font-mono ${
                       daysUntilTen < 0 ? 'text-rose-400 font-bold' : daysUntilTen === 0 ? 'text-amber-400 font-bold' : 'text-slate-400'

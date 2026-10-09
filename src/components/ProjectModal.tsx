@@ -34,7 +34,7 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
     recurring_amount: 0,
     recurring_period: 'ninguno',
     next_billing_date: '',
-    currency: 'USD',
+    currency: 'ARS',
     notes: '',
   });
 
@@ -73,7 +73,7 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
         recurring_amount: 0,
         recurring_period: 'ninguno',
         next_billing_date: '',
-        currency: 'USD',
+        currency: 'ARS',
         notes: '',
       });
     }
@@ -264,7 +264,7 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Costo Renovación ($ USD/año)
+                      Costo Renovación ($ ARS/año)
                     </label>
                     <input
                       type="number"

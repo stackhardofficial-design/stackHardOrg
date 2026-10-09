@@ -60,7 +60,7 @@ export function StatsCards({ projects }: StatsCardsProps) {
           <span className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
             ${totalGenerado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
-          <span className="text-xs text-brand-orange font-mono font-semibold">USD</span>
+          <span className="text-xs text-brand-orange font-mono font-semibold">ARS</span>
         </div>
         <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1.5">
           <TrendingUp className="w-3.5 h-3.5 text-brand-orange" />

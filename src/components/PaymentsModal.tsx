@@ -431,7 +431,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                   <p className="text-xs text-slate-400 mt-1">
                     Monto mensual fijado:{' '}
                     <span className="text-white font-mono font-bold">
-                      ${Number(project.recurring_amount || 0).toFixed(2)} USD
+                      ${Number(project.recurring_amount || 0).toFixed(2)} ARS
                     </span>
                     {project.recurring_period !== 'mensual' && (
                       <span className="text-slate-500 ml-1.5">(Este proyecto no tiene recurrencia mensual activa)</span>
@@ -531,7 +531,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                         {payment ? (
                           <div className="space-y-1">
                             <div className="text-sm font-extrabold text-emerald-400 font-mono">
-                              ${Number(payment.amount).toFixed(2)} USD
+                              ${Number(payment.amount).toFixed(2)} ARS
                             </div>
                             <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
                               <span>Cobrado: {payment.payment_date}</span>
@@ -540,7 +540,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                         ) : (
                           <div className="space-y-1">
                             <div className="text-sm font-extrabold text-slate-300 font-mono">
-                              ${Number(project.recurring_amount || 0).toFixed(2)} USD
+                              ${Number(project.recurring_amount || 0).toFixed(2)} ARS
                             </div>
                             <div className="text-[10px] text-slate-500 font-mono">
                               {isOverdue ? 'Cobro pendiente' : 'Sin registrar'}
@@ -605,7 +605,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                     <div className="text-xs text-slate-400 flex flex-wrap items-center gap-3">
                       <span>
                         Costo anual:{' '}
-                        <strong className="text-white font-mono">${Number(project.domain_cost || 0).toFixed(2)} USD</strong>
+                        <strong className="text-white font-mono">${Number(project.domain_cost || 0).toFixed(2)} ARS</strong>
                       </span>
                       <span>•</span>
                       <span>
@@ -714,7 +714,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                             <div className="flex justify-between">
                               <span>Monto a cobrar:</span>
                               <strong className="text-white font-mono">
-                                ${Number(project.domain_cost || 0).toFixed(2)} USD
+                                ${Number(project.domain_cost || 0).toFixed(2)} ARS
                               </strong>
                             </div>
                             {domainPayment && (
@@ -776,7 +776,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                     <span className="text-xs text-slate-400 uppercase font-mono block">Precio Pactado</span>
                     <span className="text-2xl font-extrabold text-white font-mono">
                       ${Number(project.one_time_price || 0).toFixed(2)}{' '}
-                      <span className="text-xs text-brand-orange">USD</span>
+                      <span className="text-xs text-brand-orange">ARS</span>
                     </span>
                   </div>
                 </div>
@@ -786,11 +786,11 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-mono">
                       <span className="text-emerald-400 font-bold">
-                        Abonado: ${totalPagadoUnico.toFixed(2)} USD
+                        Abonado: ${totalPagadoUnico.toFixed(2)} ARS
                       </span>
                       <span className={saldoPendienteUnico > 0 ? 'text-amber-400 font-bold' : 'text-slate-400'}>
                         {saldoPendienteUnico > 0
-                          ? `Pendiente: $${saldoPendienteUnico.toFixed(2)} USD`
+                          ? `Pendiente: $${saldoPendienteUnico.toFixed(2)} ARS`
                           : '100% Cobrado'}
                       </span>
                     </div>
@@ -819,7 +819,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                     <div className="text-xs text-slate-400">
                       Resta cobrar{' '}
                       <span className="text-white font-mono font-bold">
-                        ${saldoPendienteUnico.toFixed(2)} USD
+                        ${saldoPendienteUnico.toFixed(2)} ARS
                       </span>{' '}
                       para liquidar el total.
                     </div>
@@ -863,7 +863,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                       />
                     </div>
                     <div className="sm:col-span-1">
-                      <label className="block text-[11px] text-slate-400 mb-1">Monto ($ USD)</label>
+                      <label className="block text-[11px] text-slate-400 mb-1">Monto ($ ARS)</label>
                       <input
                         type="number"
                         step="0.01"
@@ -936,7 +936,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                 <div>
                   <span className="text-xs text-slate-400 font-mono uppercase tracking-wider">Total Histórico</span>
                   <div className="text-xl font-extrabold text-white font-mono mt-0.5">
-                    ${totalCobradoGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2 })} <span className="text-xs text-brand-orange">USD</span>
+                    ${totalCobradoGeneral.toLocaleString('es-AR', { minimumFractionDigits: 2 })} <span className="text-xs text-brand-orange">ARS</span>
                   </div>
                 </div>
 
@@ -972,7 +972,7 @@ export function PaymentsModal({ isOpen, onClose, project, onPaymentUpdated }: Pa
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">Monto ($ USD) *</label>
+                      <label className="block text-[11px] font-semibold text-slate-300 mb-1">Monto ($ ARS) *</label>
                       <input
                         type="number"
                         step="0.01"
