@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import { Plus, RefreshCw, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, RefreshCw, Database, CheckCircle2 } from 'lucide-react';
 
 interface NavbarProps {
   onNewProject: () => void;
@@ -12,6 +11,25 @@ interface NavbarProps {
 }
 
 export function Navbar({ onNewProject, onRefresh, isLoading, totalProjects }: NavbarProps) {
+  const [isPinging, setIsPinging] = useState(false);
+  const [pingSuccess, setPingSuccess] = useState(false);
+
+  const handleKeepAlivePing = async () => {
+    setIsPinging(true);
+    try {
+      const res = await fetch('/api/keep-alive');
+      const data = await res.json();
+      if (data.success) {
+        setPingSuccess(true);
+        setTimeout(() => setPingSuccess(false), 3000);
+      }
+    } catch (err) {
+      console.error('Error al realizar keep-alive:', err);
+    } finally {
+      setIsPinging(false);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 bg-brand-dark/90 backdrop-blur-md border-b border-brand-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +59,21 @@ export function Navbar({ onNewProject, onRefresh, isLoading, totalProjects }: Na
           </div>
 
           {/* Acciones */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* Indicador y Botón Keep-Alive de Supabase */}
+            <button
+              onClick={handleKeepAlivePing}
+              disabled={isPinging}
+              title="Base de datos Supabase conectada con Keep-Alive automático activo. Haz clic para probar ping."
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-brand-surface border border-brand-border hover:border-emerald-500/40 text-xs text-slate-300 transition-colors"
+            >
+              <span className={`w-2 h-2 rounded-full ${pingSuccess ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-emerald-500 animate-pulse'}`} />
+              <Database className="w-3.5 h-3.5 text-slate-400" />
+              <span className="font-mono text-[11px]">
+                {pingSuccess ? 'BD Despierta ✓' : isPinging ? 'Pingeando...' : 'BD Activa'}
+              </span>
+            </button>
+
             <button
               onClick={onRefresh}
               disabled={isLoading}

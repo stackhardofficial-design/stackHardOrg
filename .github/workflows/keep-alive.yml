@@ -1,0 +1,36 @@
+name: Supabase Keep-Alive Ping
+
+on:
+  schedule:
+    # Corre automáticamente cada 3 días a las 08:00 UTC (previene la pausa de 7 días de Supabase)
+    - cron: '0 8 */3 * *'
+  workflow_dispatch: # Permite ejecutar el ping manualmente desde la pestaña Actions de GitHub
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping directo a Supabase REST API
+        run: |
+          echo "Ejecutando ping de actividad a Supabase..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://wnyczsikqpevioplsqln.supabase.co/rest/v1/system_heartbeat?on_conflict=id" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueWN6c2lrcXBldmlvcGxzcWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NTEyMzEsImV4cCI6MjEwNzEyNzIzMX0.B_olMs25ruqxN0ddznrjq0DgzDKQ5T_JO2mBPV7OT4c" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueWN6c2lrcXBldmlvcGxzcWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NTEyMzEsImV4cCI6MjEwNzEyNzIzMX0.B_olMs25ruqxN0ddznrjq0DgzDKQ5T_JO2mBPV7OT4c" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d '{"id": "heartbeat", "last_ping": "now()"}')
+          
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          
+          echo "Código HTTP recibido: $HTTP_CODE"
+          echo "Respuesta: $BODY"
+          
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Ping a Supabase exitoso. La base de datos se mantendrá activa."
+          else
+            echo "⚠️ Advertencia en el ping, verificando con lectura..."
+            curl -s "https://wnyczsikqpevioplsqln.supabase.co/rest/v1/projects?select=id&limit=1" \
+              -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueWN6c2lrcXBldmlvcGxzcWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NTEyMzEsImV4cCI6MjEwNzEyNzIzMX0.B_olMs25ruqxN0ddznrjq0DgzDKQ5T_JO2mBPV7OT4c" \
+              -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndueWN6c2lrcXBldmlvcGxzcWxuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NTEyMzEsImV4cCI6MjEwNzEyNzIzMX0.B_olMs25ruqxN0ddznrjq0DgzDKQ5T_JO2mBPV7OT4c"
+          fi
