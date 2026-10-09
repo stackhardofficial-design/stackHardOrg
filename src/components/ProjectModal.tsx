@@ -88,16 +88,19 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-brand-card border border-brand-border rounded-2xl shadow-2xl overflow-hidden my-6">
         {/* Cabecera */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <h2 className="text-lg font-bold text-white">
-            {initialProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
-          </h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-brand-border bg-brand-dark/95">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-brand-orange" />
+            <h2 className="text-base sm:text-lg font-bold text-white tracking-wide uppercase">
+              {initialProject ? 'Editar Proyecto' : 'Nuevo Proyecto'}
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-brand-surface transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -105,28 +108,28 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="p-6 max-h-[80vh] overflow-y-auto space-y-5">
-          {/* Datos Generales */}
+          {/* 1. Datos Generales */}
           <div>
-            <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-3">
               1. Información General
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Nombre del Proyecto *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej: Odontología Pérez, SaaS ERP"
+                  placeholder="Ej: Clínica Dental Sonrisas, SaaS ERP"
                   value={formData.name || ''}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Cliente o Contacto
                 </label>
                 <input
@@ -134,16 +137,16 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
                   placeholder="Ej: Dr. Roberto Gómez"
                   value={formData.client_name || ''}
                   onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Tipo</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Tipo</label>
                 <select
                   value={formData.type || 'landing'}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as ProjectType })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 >
                   <option value="landing">Landing Page</option>
                   <option value="sistema">Sistema Web</option>
@@ -154,11 +157,11 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Estado</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Estado</label>
                 <select
                   value={formData.status || 'activo'}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as ProjectStatus })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 >
                   <option value="activo">Activo</option>
                   <option value="en_desarrollo">En Desarrollo</option>
@@ -169,43 +172,43 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-300 mb-1">URL de la Web</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">URL de la Web</label>
                 <input
                   type="text"
-                  placeholder="https://odontoperez.com"
+                  placeholder="https://clinicasonrisas.com"
                   value={formData.url || ''}
                   onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Dominio y Renovaciones */}
+          {/* 2. Dominio y Renovaciones */}
           <div>
-            <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-3">
               2. Dominio & Renovación
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Nombre de Dominio</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Nombre de Dominio</label>
                 <input
                   type="text"
-                  placeholder="odontoperez.com"
+                  placeholder="clinicasonrisas.com"
                   value={formData.domain_name || ''}
                   onChange={(e) => setFormData({ ...formData, domain_name: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Registrador</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Registrador</label>
                 <input
                   type="text"
                   placeholder="Namecheap, GoDaddy, Hostinger, Porkbun"
                   value={formData.domain_registrar || ''}
                   onChange={(e) => setFormData({ ...formData, domain_registrar: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
 
@@ -215,7 +218,7 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
                   id="domain_renews"
                   checked={formData.domain_renews ?? true}
                   onChange={(e) => setFormData({ ...formData, domain_renews: e.target.checked })}
-                  className="rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-0 w-4 h-4 cursor-pointer"
+                  className="rounded bg-brand-dark border-brand-border text-brand-orange focus:ring-0 w-4 h-4 cursor-pointer accent-orange-500"
                 />
                 <label htmlFor="domain_renews" className="text-xs text-slate-300 cursor-pointer">
                   ¿Tengo que renovar este dominio anualmente?
@@ -225,28 +228,28 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
               {formData.domain_renews && (
                 <>
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
                       Fecha de Renovación / Vencimiento
                     </label>
                     <input
                       type="date"
                       value={formData.domain_renewal_date || ''}
                       onChange={(e) => setFormData({ ...formData, domain_renewal_date: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                      className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
                       Costo Renovación ($ USD/año)
                     </label>
                     <input
                       type="number"
                       step="0.01"
-                      placeholder="12.99"
+                      placeholder="14.99"
                       value={formData.domain_cost ?? 0}
                       onChange={(e) => setFormData({ ...formData, domain_cost: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                      className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                     />
                   </div>
                 </>
@@ -254,86 +257,83 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
             </div>
           </div>
 
-          {/* Cuentas de Google e Infraestructura */}
+          {/* 3. Cuentas de Google e Infraestructura */}
           <div>
-            <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-3">
               3. Cuentas Google & Servidores / BD
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Cuenta de Google Asociada
                 </label>
                 <input
                   type="email"
-                  placeholder="ejemplo@gmail.com (donde está guardado o registrado)"
+                  placeholder="ejemplo@gmail.com (donde está registrado el proyecto/dominio)"
                   value={formData.google_account || ''}
                   onChange={(e) => setFormData({ ...formData, google_account: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Identifica en qué cuenta de Google tienes las credenciales, Drive, Firebase o correo.
-                </p>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Servidor / Hosting</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Servidor / Hosting</label>
                 <input
                   type="text"
                   placeholder="Vercel, Railway, VPS, Hostinger, Firebase"
                   value={formData.hosting_provider || ''}
                   onChange={(e) => setFormData({ ...formData, hosting_provider: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Base de Datos</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Base de Datos</label>
                 <input
                   type="text"
                   placeholder="Supabase, Neon, PostgreSQL, MongoDB, Ninguna"
                   value={formData.db_provider || ''}
                   onChange={(e) => setFormData({ ...formData, db_provider: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          {/* Cobros y Finanzas */}
+          {/* 4. Cobros y Finanzas */}
           <div>
-            <h3 className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3">
-              4. Cobros & Esquema de Precios
+            <h3 className="text-xs font-bold text-brand-orange uppercase tracking-wider mb-3">
+              4. Cobros & Esquema Financiero
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Tipo de Cobro</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Tipo de Cobro</label>
                 <select
                   value={formData.billing_type || 'pago_unico'}
                   onChange={(e) => setFormData({ ...formData, billing_type: e.target.value as BillingType })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 >
                   <option value="pago_unico">Pago Único (ej: Landing)</option>
                   <option value="mensual">Mensual Recurrente</option>
-                  <option value="anual">Anual</option>
-                  <option value="mixto">Mixto (Pago Único + Mantenimiento Mensual)</option>
+                  <option value="anual">Anual Recurrente</option>
+                  <option value="mixto">Mixto (Pago Único + Mantenimiento)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Precio Pago Único ($)</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Precio Pago Único ($)</label>
                 <input
                   type="number"
                   step="0.01"
                   placeholder="350.00"
                   value={formData.one_time_price ?? 0}
                   onChange={(e) => setFormData({ ...formData, one_time_price: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Mantenimiento Recurrente ($)
                 </label>
                 <input
@@ -342,16 +342,16 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
                   placeholder="25.00"
                   value={formData.recurring_amount ?? 0}
                   onChange={(e) => setFormData({ ...formData, recurring_amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Frecuencia Mantenimiento</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Frecuencia Mantenimiento</label>
                 <select
                   value={formData.recurring_period || 'ninguno'}
                   onChange={(e) => setFormData({ ...formData, recurring_period: e.target.value as RecurringPeriod })}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                  className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
                 >
                   <option value="ninguno">Ninguno</option>
                   <option value="mensual">Mensual</option>
@@ -361,14 +361,14 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
 
               {formData.recurring_period !== 'ninguno' && (
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
                     Próxima Fecha de Cobro de Mantenimiento
                   </label>
                   <input
                     type="date"
                     value={formData.next_billing_date || ''}
                     onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                    className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none font-mono"
                   />
                 </div>
               )}
@@ -377,7 +377,7 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
 
           {/* Notas */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
               Notas, Accesos o Detalles adicionales
             </label>
             <textarea
@@ -385,26 +385,26 @@ export function ProjectModal({ isOpen, onClose, onSave, initialProject }: Projec
               placeholder="Notas de accesos, credenciales, instrucciones de despliegue o cliente..."
               value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+              className="w-full bg-brand-dark border border-brand-border focus:border-brand-orange rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
             />
           </div>
 
           {/* Botones */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-brand-border">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-4 py-2 text-sm text-slate-300 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-brand-surface transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg shadow-md transition-all active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-xs uppercase tracking-wider font-bold text-black bg-gradient-to-r from-brand-orange to-amber-600 hover:from-brand-orangeBright hover:to-amber-500 rounded-lg shadow-ember transition-all active:scale-95 disabled:opacity-50"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 stroke-[3]" />
               <span>{isSubmitting ? 'Guardando...' : 'Guardar Proyecto'}</span>
             </button>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertTriangle, Clock, Calendar, ShieldAlert, ArrowRight } from 'lucide-react';
+import { AlertCircle, Clock, ShieldAlert, ArrowRight, ExternalLink } from 'lucide-react';
 import { ProjectWithPayments } from '@/types';
 
 interface UpcomingRenewalsProps {
@@ -13,7 +13,7 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Dominios que renuevan en los próximos 45 días o vencidos
+  // Dominios que renuevan en los próximos 45 días o ya vencieron
   const domainAlerts = projects
     .filter((p) => p.domain_renews && p.domain_name && p.domain_renewal_date)
     .map((p) => {
@@ -43,35 +43,53 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
 
   return (
     <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Alertas de Dominios */}
+      {/* 1. Alertas de Renovación de Dominio */}
       {domainAlerts.length > 0 && (
-        <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs uppercase tracking-wider mb-2.5">
-            <ShieldAlert className="w-4 h-4" />
-            <span>Dominios a Renovar Próximamente ({domainAlerts.length})</span>
+        <div className="bg-brand-card border border-brand-orange/30 rounded-xl p-4 shadow-metal">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-brand-orange font-bold text-xs uppercase tracking-wider">
+              <ShieldAlert className="w-4 h-4" />
+              <span>Dominios por Renovar ({domainAlerts.length})</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400 bg-brand-surface px-2 py-0.5 rounded border border-brand-border">
+              Acción requerida
+            </span>
           </div>
+
           <div className="space-y-2">
             {domainAlerts.map(({ project, days, renewalDate }) => (
               <div
                 key={project.id}
                 onClick={() => onSelectProject(project)}
-                className="flex items-center justify-between bg-slate-900/80 hover:bg-slate-800 p-2.5 rounded-lg border border-amber-500/20 cursor-pointer transition-colors"
+                className="group flex items-center justify-between bg-brand-dark/80 hover:bg-brand-surface p-3 rounded-lg border border-brand-border hover:border-brand-orange/40 cursor-pointer transition-all"
               >
                 <div>
-                  <span className="font-mono text-xs text-white font-medium block">
-                    {project.domain_name}
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    {project.name} {project.domain_registrar ? `(${project.domain_registrar})` : ''}
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-white font-bold group-hover:text-brand-orange transition-colors">
+                      {project.domain_name}
+                    </span>
+                    {project.domain_registrar && (
+                      <span className="text-[10px] text-slate-400 font-mono bg-slate-800/80 px-1.5 py-0.2 rounded border border-slate-700">
+                        {project.domain_registrar}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    {project.name}
                   </span>
                 </div>
+
                 <div className="text-right">
-                  <span className={`text-xs font-bold block ${
-                    days <= 0 ? 'text-rose-400' : days <= 15 ? 'text-amber-400' : 'text-emerald-400'
+                  <span className={`text-xs font-mono font-bold block ${
+                    days < 0 
+                      ? 'text-rose-500' 
+                      : days <= 15 
+                      ? 'text-brand-orange' 
+                      : 'text-amber-400'
                   }`}>
                     {days < 0 ? `Vencido (${Math.abs(days)}d)` : days === 0 ? '¡Vence Hoy!' : `En ${days} días`}
                   </span>
-                  <span className="text-[10px] text-slate-400">{renewalDate}</span>
+                  <span className="text-[10px] text-slate-500 font-mono">{renewalDate}</span>
                 </div>
               </div>
             ))}
@@ -79,33 +97,40 @@ export function UpcomingRenewals({ projects, onSelectProject }: UpcomingRenewals
         </div>
       )}
 
-      {/* Alertas de Cobros de Mantenimiento */}
+      {/* 2. Próximos Cobros de Mantenimiento */}
       {billingAlerts.length > 0 && (
-        <div className="bg-indigo-950/20 border border-indigo-500/30 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs uppercase tracking-wider mb-2.5">
-            <Clock className="w-4 h-4" />
-            <span>Próximos Cobros de Mantenimiento ({billingAlerts.length})</span>
+        <div className="bg-brand-card border border-brand-border rounded-xl p-4 shadow-metal">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <Clock className="w-4 h-4" />
+              <span>Próximos Cobros de Mantenimiento ({billingAlerts.length})</span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400 bg-brand-surface px-2 py-0.5 rounded border border-brand-border">
+              Facturación
+            </span>
           </div>
+
           <div className="space-y-2">
             {billingAlerts.map(({ project, days, billDate }) => (
               <div
                 key={project.id}
                 onClick={() => onSelectProject(project)}
-                className="flex items-center justify-between bg-slate-900/80 hover:bg-slate-800 p-2.5 rounded-lg border border-indigo-500/20 cursor-pointer transition-colors"
+                className="group flex items-center justify-between bg-brand-dark/80 hover:bg-brand-surface p-3 rounded-lg border border-brand-border hover:border-amber-500/40 cursor-pointer transition-all"
               >
                 <div>
-                  <span className="text-xs text-white font-medium block">
+                  <span className="text-xs text-white font-bold group-hover:text-amber-400 transition-colors block">
                     {project.name}
                   </span>
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
                     Cliente: {project.client_name || 'Sin especificar'}
                   </span>
                 </div>
+
                 <div className="text-right">
-                  <span className="text-xs font-bold text-indigo-300 block">
+                  <span className="text-xs font-mono font-bold text-emerald-400 block">
                     +${project.recurring_amount} USD
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 font-mono">
                     {days < 0 ? `Atrasado (${Math.abs(days)}d)` : days === 0 ? 'Cobrar Hoy' : `En ${days} días`} ({billDate})
                   </span>
                 </div>
