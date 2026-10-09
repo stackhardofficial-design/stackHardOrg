@@ -368,7 +368,7 @@ export function ProjectCard({
         <div className="text-xs">
           <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider block">Cobrado registrado</span>
           <span className="font-mono font-extrabold text-white text-base">
-            ${totalPagado > 0 ? totalPagado : Number(project.one_time_price || 0)} <span className="text-xs text-slate-400">USD</span>
+            ${totalPagado.toLocaleString('es-AR', { minimumFractionDigits: 2 })} <span className="text-xs text-slate-400">USD</span>
           </span>
         </div>
 
